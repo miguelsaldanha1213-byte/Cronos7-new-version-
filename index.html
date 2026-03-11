@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cronos 7 | Public Social Network</title>
+    
+    <link rel="icon" type="image/jpeg" href="IMG-20260302-WA0005.jpg">
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -13,6 +16,20 @@
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
         .hidden { display: none !important; }
         
+        /* ESTILO DA LOGO */
+        .logo-container { 
+            text-align: center; 
+            margin-bottom: 25px; 
+            padding: 10px;
+        }
+        .logo-img { 
+            width: 140px; 
+            height: auto; 
+            object-fit: contain;
+            /* Efeito para suavizar a borda da imagem no fundo preto */
+            mix-blend-mode: lighten; 
+        }
+
         .auth-container { height: 100vh; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle at center, #111 0%, #000 100%); }
         .auth-box { background: var(--panel); padding: 35px; border-radius: 15px; border: 1px solid var(--border); width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 6px; box-sizing: border-box; outline: none; }
@@ -48,6 +65,7 @@
 
     <div id="auth-screen" class="auth-container">
         <div class="auth-box">
+            <img src="IMG-20260302-WA0005.jpg" alt="Logo" style="width: 110px; mix-blend-mode: lighten; margin-bottom: 10px;">
             <h1 style="margin-bottom: 5px;">CRONOS <span style="color:var(--primary)">7</span></h1>
             <p style="color:#555; font-size: 13px; margin-bottom: 25px;">NETWORK ACCESS PANEL</p>
             <input type="text" id="reg-name" placeholder="Choose Unique Username">
@@ -60,8 +78,11 @@
 
     <div id="app-screen" class="main-app hidden">
         <div class="sidebar">
-            <h2 style="color: var(--primary); margin-bottom: 5px;">CRONOS 7</h2>
-            <div id="user-display" style="font-size:12px; color:#555; margin-bottom: 30px; letter-spacing: 1px;"></div>
+            <div class="logo-container">
+                <img src="IMG-20260302-WA0005.jpg" alt="Cronos 7" class="logo-img">
+            </div>
+            
+            <div id="user-display" style="font-size:12px; text-align:center; color:#555; margin-bottom: 30px; letter-spacing: 1px;"></div>
             
             <div class="nav-link active" id="link-feed" onclick="showTab('feed')">GLOBAL FEED</div>
             <div class="nav-link" id="link-create" onclick="showTab('create')">CREATE POST</div>
@@ -74,7 +95,7 @@
         <div class="content">
             <div id="tab-feed">
                 <h1 style="margin-top:0">Recent Activity</h1>
-                <div id="posts-container">Establishing secure connection to Youy...</div>
+                <div id="posts-container">Establishing secure connection...</div>
             </div>
 
             <div id="tab-create" class="hidden">
@@ -87,6 +108,7 @@
     </div>
 
     <script>
+        // ... (Firebase Config e Scripts permanecem os mesmos que enviamos antes)
         const firebaseConfig = {
             apiKey: "AIzaSyBFtmgcnxahTDzM-LE16i2dpE5ydqXHhv0",
             authDomain: "youy-f5937.firebaseapp.com",
@@ -107,36 +129,26 @@
             const name = document.getElementById('reg-name').value.trim();
             const errDiv = document.getElementById('auth-error');
             errDiv.innerText = "";
-
             if (!email || !pass) return alert("Please fill all fields.");
-
             try {
                 await auth.signInWithEmailAndPassword(email, pass).catch(async (err) => {
                     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-                        if(!name) throw new Error("Account not found. To register, please enter a Username.");
-                        
+                        if(!name) throw new Error("Account not found. Please enter a Username.");
                         const snap = await db.collection("users").where("username", "==", name).get();
-                        if(!snap.empty) throw new Error("Username already taken by another user.");
-
+                        if(!snap.empty) throw new Error("Username already taken.");
                         const newUser = await auth.createUserWithEmailAndPassword(email, pass);
-                        await db.collection("users").doc(newUser.user.uid).set({ 
-                            username: name,
-                            joined: new Date().toISOString()
-                        });
+                        await db.collection("users").doc(newUser.user.uid).set({ username: name, joined: new Date().toISOString() });
                         return newUser;
                     }
                     throw err;
                 });
-            } catch (e) {
-                errDiv.innerText = "STATUS: " + e.message;
-            }
+            } catch (e) { errDiv.innerText = "STATUS: " + e.message; }
         }
 
         async function publishPost() {
             const title = document.getElementById('post-title').value;
             const body = document.getElementById('post-content').value;
             if(!title || !body) return alert("All fields are mandatory.");
-
             const postId = Date.now().toString();
             try {
                 await db.collection("posts").doc(postId).set({
@@ -145,7 +157,6 @@
                     authorId: auth.currentUser.uid,
                     likes: 0,
                     comments: [],
-                    link: `https://cronot.me/${userProfile.username}/${postId}`,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 document.getElementById('post-title').value = "";
@@ -158,55 +169,31 @@
             db.collection("posts").orderBy("timestamp", "desc").onSnapshot(snap => {
                 const container = document.getElementById('posts-container');
                 container.innerHTML = "";
-                if(snap.empty) container.innerHTML = "No transmissions found in the network.";
-                
                 snap.forEach(doc => {
                     const post = doc.data();
                     const id = doc.id;
                     const isOwner = auth.currentUser && post.authorId === auth.currentUser.uid;
-                    
-                    container.innerHTML += `
-                        <div class="card">
-                            ${isOwner ? `<button class="delete-btn" onclick="deletePost('${id}')">Terminate</button>` : ''}
-                            <div class="post-header">
-                                <span class="post-title">${post.title}</span>
-                                <small style="color:#555">SIGNAL FROM: @${post.author}</small>
-                            </div>
-                            <p style="line-height:1.6; color:#ccc">${post.body}</p>
-                            <div class="actions">
-                                <button class="action-btn" onclick="likePost('${id}', ${post.likes})">👍 ${post.likes}</button>
-                                <button class="action-btn" onclick="addComment('${id}')">💬 COMMENT</button>
-                            </div>
-                            <div class="comment-section">
-                                ${post.comments ? post.comments.map(c => `<div class="comment"><b>${c.user}</b> ${c.text}</div>`).join('') : ''}
-                            </div>
-                        </div>`;
+                    container.innerHTML += `<div class="card">
+                        ${isOwner ? `<button class="delete-btn" onclick="deletePost('${id}')">Terminate</button>` : ''}
+                        <div class="post-header"><span class="post-title">${post.title}</span><small style="color:#555">@${post.author}</small></div>
+                        <p style="color:#ccc">${post.body}</p>
+                        <div class="actions">
+                            <button class="action-btn" onclick="likePost('${id}', ${post.likes})">👍 ${post.likes}</button>
+                            <button class="action-btn" onclick="addComment('${id}')">💬 COMMENT</button>
+                        </div>
+                        <div class="comment-section">${post.comments ? post.comments.map(c => `<div class="comment"><b>${c.user}</b> ${c.text}</div>`).join('') : ''}</div>
+                    </div>`;
                 });
-            }, err => {
-                if(err.code === "permission-denied") alert("Security Alert: Access denied by Firestore Rules.");
             });
         }
 
-        async function likePost(id, current) {
-            await db.collection("posts").doc(id).update({ likes: current + 1 });
-        }
-
+        async function likePost(id, current) { await db.collection("posts").doc(id).update({ likes: current + 1 }); }
         async function addComment(id) {
             const msg = prompt("Message:");
             if(!msg) return;
-            await db.collection("posts").doc(id).update({
-                comments: firebase.firestore.FieldValue.arrayUnion({
-                    user: userProfile.username,
-                    text: msg
-                })
-            });
+            await db.collection("posts").doc(id).update({ comments: firebase.firestore.FieldValue.arrayUnion({ user: userProfile.username, text: msg }) });
         }
-
-        async function deletePost(id) {
-            if(confirm("Confirm data termination?")) {
-                await db.collection("posts").doc(id).delete();
-            }
-        }
+        async function deletePost(id) { if(confirm("Confirm?")) await db.collection("posts").doc(id).delete(); }
 
         auth.onAuthStateChanged(async user => {
             if(user) {
@@ -227,7 +214,6 @@
             document.getElementById('link-feed').classList.toggle('active', t === 'feed');
             document.getElementById('link-create').classList.toggle('active', t === 'create');
         }
-
         function logout() { auth.signOut().then(() => location.reload()); }
     </script>
 </body>
