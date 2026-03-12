@@ -3,105 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cronos 7 | Professional Social Network  done by CRONO7(mddecn)</title>
+    <title>Cronos 7 | Professional Network</title>
     <link rel="icon" type="image/jpeg" href="IMG-20260302-WA0005.jpg">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
     <style>
-        :root { --primary: #00a2ff; --bg: #050505; --panel: #111; --text: #fff; --border: #222; --dev: #ff4757; --art: #ffa502; --science: #2ed573; }
+        :root { 
+            --primary: #00a2ff; 
+            --bg: #050505; 
+            --panel: #111; 
+            --text: #fff; 
+            --border: #222; 
+            --dev: #ff4757; 
+            --art: #ffa502; 
+            --science: #2ed573; 
+            --phil: #a29bfe;
+        }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
         .hidden { display: none !important; }
         
         .sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; width: 280px; position: fixed; height: 100vh; z-index: 100; }
         .logo-img { width: 100px; mix-blend-mode: lighten; margin-bottom: 20px; align-self: center; }
-        .nav-link { padding: 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; color: #aaa; transition: 0.2s; }
+        .nav-link { padding: 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; color: #aaa; transition: 0.2s; font-weight: 500; }
         .nav-link:hover { background: #1a1a1a; color: #fff; }
-        .nav-link.active { background: var(--primary); color: #fff; font-weight: bold; }
+        .nav-link.active { background: var(--primary); color: #fff; }
 
         .content { margin-left: 280px; padding: 40px; background: #080808; min-height: 100vh; }
 
-        .search-bar { width: 100%; max-width: 500px; margin-bottom: 30px; position: relative; }
-        .search-bar input { padding-left: 40px; background: #111; border: 1px solid #333; }
+        .search-container { width: 100%; max-width: 600px; margin-bottom: 30px; }
+        .search-container input { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 30px; outline: none; transition: 0.3s; }
+        .search-container input:focus { border-color: var(--primary); background: #000; }
 
-        .card { background: var(--panel); border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 25px; position: relative; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #333; object-fit: cover; border: 2px solid var(--primary); }
-        .badge { padding: 4px 10px; border-radius: 4px; font-size: 10px; text-transform: uppercase; margin-bottom: 10px; display: inline-block; font-weight: bold; }
+        .card { background: var(--panel); border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 20px; position: relative; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; background: #222; object-fit: cover; border: 2px solid var(--border); }
+        .badge { padding: 4px 10px; border-radius: 4px; font-size: 10px; text-transform: uppercase; font-weight: bold; margin-bottom: 8px; display: inline-block; }
         .badge-dev { background: var(--dev); }
         .badge-art { background: var(--art); }
         .badge-science { background: var(--science); }
+        .badge-phil { background: var(--phil); }
         
-        .profile-header { background: linear-gradient(135deg, #111 0%, #1a1a1a 100%); padding: 30px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 30px; text-align: center; }
-        .profile-pic-large { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--primary); }
-        .stats-box { display: flex; justify-content: center; gap: 20px; margin: 15px 0; font-size: 0.9rem; color: #aaa; }
+        .author-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .author-meta { flex-grow: 1; }
+        .author-name { font-weight: bold; font-size: 1.1rem; color: var(--text); }
+        .author-role { color: #666; font-size: 0.85rem; display: block; }
+        
+        .follow-btn { background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .follow-btn.following { background: transparent; border: 1px solid #444; color: #888; }
 
-        .btn-main { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 6px; box-sizing: border-box; }
+        .profile-header { background: linear-gradient(135deg, #111, #1a1a1a); padding: 40px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 30px; text-align: center; }
+        .profile-pic-large { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); margin-bottom: 15px; }
+        .stats-box { display: flex; justify-content: center; gap: 30px; margin: 20px 0; border-top: 1px solid #222; padding-top: 20px; }
+        .stat-item { text-align: center; }
+        .stat-num { display: block; font-size: 1.2rem; font-weight: bold; color: var(--text); }
+        .stat-label { font-size: 0.8rem; color: #555; text-transform: uppercase; }
 
-        .auth-container { height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .btn-main { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; }
+
         .auth-box { background: var(--panel); padding: 40px; border-radius: 15px; width: 350px; text-align: center; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" class="auth-container">
+    <div id="auth-screen" class="auth-container" style="height: 100vh; display: flex; justify-content: center; align-items: center;">
         <div class="auth-box">
             <img src="IMG-20260302-WA0005.jpg" class="logo-img">
-            <h1>CRONOS 7</h1>
-            <input type="text" id="reg-name" placeholder="Username">
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="pass" placeholder="Password">
-            <button class="btn-main" onclick="handleAuth()" style="width:100%">JOIN WORKFORCE</button>
-            <p id="auth-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+            <h1 style="letter-spacing: 1px;">CRONOS 7</h1>
+            <input type="text" id="reg-name" placeholder="Choose Username">
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="pass" placeholder="Secure Password">
+            <button class="btn-main" onclick="handleAuth()" style="width:100%">ENTER NETWORK</button>
+            <p id="auth-error" style="color:#ff4757; font-size:12px; margin-top:10px;"></p>
         </div>
     </div>
 
     <div id="app-screen" class="hidden">
         <div class="sidebar">
             <img src="IMG-20260302-WA0005.jpg" class="logo-img">
-            <div class="nav-link active" id="link-feed" onclick="showTab('feed')">WORK FEED</div>
-            <div class="nav-link" id="link-create" onclick="showTab('create')">POST WORK</div>
-            <div class="nav-link" id="link-profile" onclick="showTab('profile')">MY STATION</div>
-            <button class="btn-main" onclick="logout()" style="margin-top:auto; background:#222">DISCONNECT</button>
+            <div class="nav-link active" id="link-feed" onclick="showTab('feed')">FEED</div>
+            <div class="nav-link" id="link-create" onclick="showTab('create')">BROADCAST</div>
+            <div class="nav-link" id="link-profile" onclick="showTab('profile')">STATION</div>
+            <button class="btn-main" onclick="logout()" style="margin-top:auto; background:#222">LOGOUT</button>
         </div>
 
         <div class="content">
             <div id="tab-feed">
-                <div class="search-bar">
-                    <input type="text" id="search-input" placeholder="Search professionals or keywords..." onkeyup="filterFeed()">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Find people, jobs or theories..." onkeyup="filterFeed()">
                 </div>
-                <div id="posts-container">Establishing connection...</div>
+                <div id="posts-container">Syncing network...</div>
             </div>
 
             <div id="tab-create" class="hidden">
-                <h1>Broadcast Project</h1>
-                <input type="text" id="post-title" placeholder="Project Title">
+                <h1>New Transmission</h1>
+                <input type="text" id="post-title" placeholder="Transmission Title">
                 <select id="post-category">
-                    <option value="science">Science</option>
-                    <option value="dev">Programming</option>
-                    <option value="art">Art</option>
+                    <option value="science">Physics / Math / Science</option>
+                    <option value="dev">Programming / Tech</option>
+                    <option value="art">Art / Cinema / Acting</option>
+                    <option value="phil">Philosophy / Humanities</option>
                 </select>
-                <textarea id="post-content" rows="10" placeholder="Content..."></textarea>
-                <button class="btn-main" onclick="publishPost()">BROADCAST</button>
+                <textarea id="post-content" rows="10" placeholder="What are you working on?"></textarea>
+                <button class="btn-main" onclick="publishPost()">BROADCAST DATA</button>
             </div>
 
             <div id="tab-profile" class="hidden">
                 <div class="profile-header">
-                    <img id="prof-pic-display" src="https://via.placeholder.com/100" class="profile-pic-large">
-                    <h2 id="prof-user">@username</h2>
+                    <img id="prof-pic-display" src="https://via.placeholder.com/110" class="profile-pic-large">
+                    <h2 id="prof-user" style="margin:0">@username</h2>
                     <span id="prof-role" class="badge">PROFESSION</span>
                     <div class="stats-box">
-                        <span><b id="count-following">0</b> Following</span>
-                        <span><b id="count-followers">0</b> Followers</span>
+                        <div class="stat-item"><span class="stat-num" id="count-following">0</span><span class="stat-label">Following</span></div>
+                        <div class="stat-item"><span class="stat-num" id="count-followers">0</span><span class="stat-label">Followers</span></div>
                     </div>
-                    <p id="prof-bio" style="color:#888;">No bio.</p>
+                    <p id="prof-bio" style="color:#888; max-width:400px; margin: 0 auto;">No bio provided.</p>
                 </div>
-                <h3>Edit Station</h3>
-                <input type="text" id="edit-pic" placeholder="Profile Picture URL (e.g. https://...)">
-                <input type="text" id="edit-role" placeholder="Your Professional Title">
+                <h3>Settings</h3>
+                <input type="text" id="edit-pic" placeholder="Profile Picture URL">
+                <input type="text" id="edit-role" placeholder="Your Title (ex: Theoretical Physicist)">
                 <textarea id="edit-bio" placeholder="Professional Bio..."></textarea>
-                <button class="btn-main" onclick="updateProfile()">SAVE SETTINGS</button>
+                <button class="btn-main" onclick="updateProfile()">SAVE STATION DATA</button>
             </div>
         </div>
     </div>
@@ -121,6 +146,7 @@
         const auth = firebase.auth();
         let userProfile = null;
         let allPosts = [];
+        let followingList = [];
 
         async function handleAuth() {
             const email = document.getElementById('email').value;
@@ -128,10 +154,11 @@
             const name = document.getElementById('reg-name').value.trim();
             try {
                 await auth.signInWithEmailAndPassword(email, pass).catch(async (err) => {
+                    if(!name) throw new Error("Username required for registration.");
                     const newUser = await auth.createUserWithEmailAndPassword(email, pass);
                     await db.collection("users").doc(newUser.user.uid).set({ 
                         username: name, bio: "Professional Member", role: "Specialist", 
-                        pic: "https://via.placeholder.com/100", joined: new Date().toISOString() 
+                        pic: "https://via.placeholder.com/110", joined: new Date().toISOString() 
                     });
                 });
             } catch (e) { document.getElementById('auth-error').innerText = e.message; }
@@ -141,7 +168,11 @@
             const pic = document.getElementById('edit-pic').value;
             const bio = document.getElementById('edit-bio').value;
             const role = document.getElementById('edit-role').value;
-            await db.collection("users").doc(auth.currentUser.uid).update({ pic, bio, role });
+            await db.collection("users").doc(auth.currentUser.uid).update({ 
+                pic: pic || userProfile.pic, 
+                bio: bio || userProfile.bio, 
+                role: role || userProfile.role 
+            });
             location.reload();
         }
 
@@ -159,49 +190,58 @@
             const ers = await db.collection("follows").where("following", "==", auth.currentUser.uid).get();
             document.getElementById('count-following').innerText = ing.size;
             document.getElementById('count-followers').innerText = ers.size;
+            followingList = ing.docs.map(d => d.data().following);
         }
 
         async function publishPost() {
             const title = document.getElementById('post-title').value;
             const category = document.getElementById('post-category').value;
             const body = document.getElementById('post-content').value;
+            if(!title || !body) return alert("Fields cannot be empty.");
+
             await db.collection("posts").add({
                 title, body, category, author: userProfile.username,
                 authorId: auth.currentUser.uid, authorRole: userProfile.role,
                 authorPic: userProfile.pic, likes: 0, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
+            document.getElementById('post-title').value = "";
+            document.getElementById('post-content').value = "";
             showTab('feed');
         }
 
-        function renderPosts(posts) {
+        function renderPosts(docs) {
             const container = document.getElementById('posts-container');
             container.innerHTML = "";
-            posts.forEach(doc => {
+            docs.forEach(doc => {
                 const post = doc.data();
                 const isMe = post.authorId === auth.currentUser.uid;
+                const isFollowing = followingList.includes(post.authorId);
+                
                 container.innerHTML += `
                     <div class="card">
-                        <div class="author-info">
-                            <img src="${post.authorPic || 'https://via.placeholder.com/100'}" class="user-avatar">
-                            <div>
-                                <b>@${post.author}</b> <span class="role-text">• ${post.authorRole}</span><br>
-                                <span class="badge badge-${post.category}">${post.category}</span>
+                        <div class="author-row">
+                            <img src="${post.authorPic}" class="user-avatar">
+                            <div class="author-meta">
+                                <span class="author-name">@${post.author}</span>
+                                <span class="author-role">${post.authorRole}</span>
                             </div>
-                            ${!isMe ? `<button class="follow-btn" onclick="toggleFollow('${post.authorId}')">Connect</button>` : ''}
+                            ${!isMe ? `
+                                <button class="follow-btn ${isFollowing ? 'following' : ''}" onclick="toggleFollow('${post.authorId}')">
+                                    ${isFollowing ? 'Following' : 'Follow'}
+                                </button>` : ''}
                         </div>
-                        <span class="post-title">${post.title}</span>
-                        <p style="white-space: pre-wrap; color:#ccc;">${post.body}</p>
+                        <span class="badge badge-${post.category}">${post.category}</span>
+                        <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--primary);">${post.title}</div>
+                        <p style="white-space: pre-wrap; color:#ddd; line-height:1.6; margin:0;">${post.body}</p>
                     </div>`;
             });
         }
 
         function filterFeed() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const filtered = allPosts.filter(doc => {
-                const data = doc.data();
-                return data.author.toLowerCase().includes(query) || 
-                       data.title.toLowerCase().includes(query) || 
-                       data.authorRole.toLowerCase().includes(query);
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allPosts.filter(d => {
+                const p = d.data();
+                return p.author.toLowerCase().includes(q) || p.authorRole.toLowerCase().includes(q) || p.title.toLowerCase().includes(q);
             });
             renderPosts(filtered);
         }
@@ -216,7 +256,8 @@
                 document.getElementById('prof-bio').innerText = userProfile.bio;
                 document.getElementById('prof-role').innerText = userProfile.role;
                 document.getElementById('prof-pic-display').src = userProfile.pic;
-                loadStats();
+                
+                await loadStats();
                 db.collection("posts").orderBy("timestamp", "desc").onSnapshot(snap => {
                     allPosts = snap.docs;
                     filterFeed();
