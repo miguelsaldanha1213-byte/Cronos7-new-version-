@@ -46,6 +46,7 @@
         .profile-pic-lg { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; }
 
         .btn-main { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-special { background: #ff4757; margin-top: 10px; display: block; width: 100%; text-decoration: none; text-align: center; box-sizing: border-box; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; box-sizing: border-box; }
         
         .follow-btn { padding: 5px 15px; border-radius: 20px; border: 1px solid var(--primary); background: transparent; color: var(--primary); cursor: pointer; font-size: 0.8rem; font-weight: bold; }
@@ -88,12 +89,15 @@
             <div id="tab-create" class="hidden">
                 <h2>New Professional Transmission</h2>
                 <input type="text" id="post-title" placeholder="Project / Theory Title">
-                <select id="post-category">
+                <select id="post-category" onchange="checkCategory(this.value)">
                     <option value="science">Physics / Mathematics</option>
                     <option value="dev">Software Engineering</option>
                     <option value="art">Arts / Acting</option>
                     <option value="phil">Philosophy</option>
                 </select>
+                
+                <a href="https://miguelsaldanha1213-byte.github.io/ChronoMaisend/" id="btn-site-link" class="btn-main btn-special hidden" target="_blank">IR PARA CHRONOMAISEND</a>
+
                 <textarea id="post-content" rows="6" placeholder="What are you working on?"></textarea>
                 <button class="btn-main" onclick="publishPost()">BROADCAST</button>
             </div>
@@ -130,6 +134,15 @@
         let isReg = false;
         let allPosts = [];
         let myFollows = [];
+
+        function checkCategory(val) {
+            const btn = document.getElementById('btn-site-link');
+            if(val === 'dev') {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
 
         function toggleAuth() {
             isReg = !isReg;
